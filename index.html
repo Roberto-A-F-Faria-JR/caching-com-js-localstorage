@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Página com Controle de Cache</title>
+</head>
+<body>
+    <h1>Exemplo de Página com Controle de Cache!</h1>
+    <p id="conteudo">Carregando...</p>
+
+    <script>
+        function carregarConteudo() {
+            var conteudoCache = localStorage.getItem('conteudoCache');
+            var timestampCache = localStorage.getItem('timestampCache');
+
+            if (conteudoCache && timestampCache) {
+                console.log('pegando do cache')
+                var tempoExpiracao = 20 * 1000; 
+                var agora = new Date().getTime();
+
+                if (agora - timestampCache < tempoExpiracao) {
+                    console.log('Pegando do cache');
+                    document.getElementById('conteudo').innerHTML = conteudoCache;
+                    return;
+                }
+            }
+
+            var xhr = new XMLHttpRequest();
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    var novoConteudo = xhr.responseText;
+                    document.getElementById('conteudo').innerHTML = novoConteudo;
+
+                    // Armazena o novo conteúdo e o timestamp no cache local
+                    localStorage.setItem('conteudoCache', novoConteudo);
+                    localStorage.setItem('timestampCache', new Date().getTime());
+                }
+            };
+
+            xhr.open('GET', 'http://localhost/testeDebug/back.php', true);
+            xhr.send();
+            console.log('pegando do server')
+        }
+
+        document.addEventListener('DOMContentLoaded', carregarConteudo);
+    </script>
+</body>
+</html>
